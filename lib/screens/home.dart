@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:todo_practice/screens/edit.dart';
+import 'package:todo_practice/database/db.dart';
+import 'package:todo_practice/database/memo.dart';
 
 class Home extends StatefulWidget {
   Home({Key? key}) : super(key: key);
@@ -10,10 +12,43 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<Widget> LoadMemo() {
+  Future<List<Memo>> loadMemos() async {
+    DBHelper sd = DBHelper();
+    return await sd.memos();
+  }
+
+  List<Widget> loadMemo() {
     List<Widget> memoList = [];
     memoList.add(Container(color: Colors.redAccent, height: 70));
     return memoList;
+  }
+
+  Widget memoBuilder() {
+    return FutureBuilder(
+      builder: (context, AsyncSnapshot projectSnap) {
+        if (projectSnap.connectionState == ConnectionState.none &&
+            projectSnap.hasData == false) {
+          return Container(
+            child: Text('메모를 지금 바로 추가 해보세요!'),
+          );
+        }
+        return ListView.builder(
+            itemCount: projectSnap.data?.length,
+            itemBuilder: (context, index) {
+              List<Memo> memo = projectSnap.data;
+              print(projectSnap.data?.length);
+              return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(memo[index].title),
+                    Text(memo[index].text),
+                    Text(memo[index].createTime),
+                    Text(memo[index].editTime),
+                  ]);
+            });
+      },
+      future: loadMemos(),
+    );
   }
 
   @override
@@ -22,20 +57,14 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text('투두 리스트'),
       ),
-      body: ListView(children: <Widget>[
-        Row(
+      body: Container(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(left: 20, top: 20, bottom: 20),
-              child: Text(
-                '메모메모',
-                style: TextStyle(fontSize: 36, color: Colors.blueAccent),
-              ),
-            )
+            Expanded(child: memoBuilder()),
           ],
         ),
-        ...LoadMemo()
-      ]),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(context, CupertinoPageRoute(builder: (context) => EditPage()));
@@ -45,6 +74,5 @@ class _HomeState extends State<Home> {
         icon: Icon(Icons.add),
       ),
     );
-    ;
   }
 }

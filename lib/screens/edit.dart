@@ -49,7 +49,7 @@ class EditPage extends StatelessWidget {
     DBHelper sd = DBHelper();
 
     var fido = Memo(
-        id: StrTosha256(DateTime.now().toString()),
+        id: strTosha256(DateTime.now().toString()),
         title: titleController.text,
         text: this.text,
         createTime: DateTime.now().toString(),
@@ -60,7 +60,7 @@ class EditPage extends StatelessWidget {
     print(await sd.memos());
   }
 
-  String StrTosha256(String text) {
+  String strTosha256(String text) {
     var bytes = utf8.encode("text"); // data being hashed
 
     return sha256.convert(bytes).toString();
